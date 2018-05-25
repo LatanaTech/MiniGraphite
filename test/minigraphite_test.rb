@@ -4,6 +4,13 @@ require_relative "../lib/mini_graphite"
 
 class MiniGraphiteTest < MiniTest::Test
 
+  def within_timezone(tz = "UTC")
+    original_tz = ENV["TZ"]
+    ENV["TZ"] = "UTC"
+    yield
+    ENV["TZ"] = original_tz
+  end
+
   def test_send_tcp_on_host
     socket_mock = mock()
     TCPSocket.expects(:new).with("HOST", "PORT").returns(socket_mock)
@@ -53,9 +60,11 @@ class MiniGraphiteTest < MiniTest::Test
   end
 
   def test_datapoint
-    Dalia::MiniGraphite.config({ :graphite_host => "graphite.host.com", :graphite_port => 2003 })
-    Dalia::MiniGraphite.expects(:send_tcp).with("test.age 31 1357117860")
-    Dalia::MiniGraphite.datapoint("test.age", 31, Time.new(2013,1,2,10,11))
+    within_timezone "UTC" do
+      Dalia::MiniGraphite.config({ :graphite_host => "graphite.host.com", :graphite_port => 2003 })
+      Dalia::MiniGraphite.expects(:send_tcp).with("test.age 31 1357121460")
+      Dalia::MiniGraphite.datapoint("test.age", 31, Time.new(2013,1,2,10,11))
+    end
   end
 
   def test_counter
@@ -90,11 +99,12 @@ class MiniGraphiteTest < MiniTest::Test
   end
 
   def test_on_datapoint_should_debug
-    Dalia::MiniGraphite.expects(:send_tcp)
-    Dalia::MiniGraphite.config()
-
-    Dalia::MiniGraphite::Logger.any_instance.expects(:debug).with("Sending datapoint: 'test.age 31 1357117860'")
-    Dalia::MiniGraphite.datapoint("test.age", 31, Time.new(2013,1,2,10,11))
+    within_timezone "UTC" do
+      Dalia::MiniGraphite.expects(:send_tcp)
+      Dalia::MiniGraphite.config()
+      Dalia::MiniGraphite::Logger.any_instance.expects(:debug).with("Sending datapoint: 'test.age 31 1357121460'")
+      Dalia::MiniGraphite.datapoint("test.age", 31, Time.new(2013,1,2,10,11))
+    end
   end
 
   def test_on_datapoint_not_send_tcp_if_mock_mode

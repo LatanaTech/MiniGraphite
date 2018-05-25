@@ -17,7 +17,10 @@ class MiniGraphiteTest < MiniTest::Test
   end
 
   def test_debug_when_rails_actived
-    Rails.expects(:logger => mock(:info))
+    unless defined? ::Rails
+      Object.const_set("Rails", Module.new)
+    end
+    ::Rails.expects(:logger => mock(:info))
     logger = Dalia::MiniGraphite::Logger.new
     logger.debug("MESSAGE")
   end
