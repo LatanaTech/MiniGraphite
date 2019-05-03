@@ -17,7 +17,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  bundler (~> 1.16.2)
+  bundler
   mini_graphite!
   minitest
   mocha
