@@ -125,8 +125,6 @@ class MiniGraphiteTest < MiniTest::Test
     Dalia::MiniGraphite.expects(:counter).with("key_prefix.result").never
     Dalia::MiniGraphite.expects(:counter).with("key_prefix.end")
 
-    Dalia::MiniGraphite.expects(:time).with("key_prefix.time_stats", is_a(Float))
-
     result =
       Dalia::MiniGraphite.benchmark_wrapper("key_prefix") do
         sleep(1)
@@ -141,8 +139,6 @@ class MiniGraphiteTest < MiniTest::Test
     Dalia::MiniGraphite.expects(:counter).with("key_prefix.time", is_a(Float))
     Dalia::MiniGraphite.expects(:counter).with("key_prefix.result", 6)
     Dalia::MiniGraphite.expects(:counter).with("key_prefix.end")
-
-    Dalia::MiniGraphite.expects(:time).with("key_prefix.time_stats", is_a(Float))
 
     result =
       Dalia::MiniGraphite.benchmark_wrapper("key_prefix", :length) do

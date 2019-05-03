@@ -59,8 +59,6 @@ module Dalia
       counter("#{key}.result", result.send(result_send_method)) if result_send_method
       counter("#{key}.end")
 
-      time("#{key}.time_stats", time * 1000)
-
       result
     end
 
