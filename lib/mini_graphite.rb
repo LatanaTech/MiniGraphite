@@ -45,8 +45,8 @@ module Dalia
       send_udp(signal) if !opts[:mock_mode]
     end
 
-    def self.benchmark_wrapper(key, result_send_method = nil)
-      counter("#{key}.ini")
+    def self.benchmark_wrapper(key, result_send_method = nil, send_ini_signal = false)
+      counter("#{key}.ini") if send_ini_signal
 
       result = nil
 

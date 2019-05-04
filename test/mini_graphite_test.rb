@@ -120,7 +120,7 @@ class MiniGraphiteTest < MiniTest::Test
   end
 
   def test_benchmark_wrapper
-    Dalia::MiniGraphite.expects(:counter).with("key_prefix.ini")
+    Dalia::MiniGraphite.expects(:counter).with("key_prefix.ini").never
     Dalia::MiniGraphite.expects(:counter).with("key_prefix.time", is_a(Float))
     Dalia::MiniGraphite.expects(:counter).with("key_prefix.result").never
     Dalia::MiniGraphite.expects(:counter).with("key_prefix.end")
@@ -135,13 +135,28 @@ class MiniGraphiteTest < MiniTest::Test
   end
 
   def test_benchmark_wrapper_sending_result
-    Dalia::MiniGraphite.expects(:counter).with("key_prefix.ini")
+    Dalia::MiniGraphite.expects(:counter).with("key_prefix.ini").never
     Dalia::MiniGraphite.expects(:counter).with("key_prefix.time", is_a(Float))
     Dalia::MiniGraphite.expects(:counter).with("key_prefix.result", 6)
     Dalia::MiniGraphite.expects(:counter).with("key_prefix.end")
 
     result =
       Dalia::MiniGraphite.benchmark_wrapper("key_prefix", :length) do
+        sleep(1)
+        "RESULT"
+      end
+
+    assert_equal("RESULT", result)
+  end
+
+  def test_benchmark_wrapper_sending_ini
+    Dalia::MiniGraphite.expects(:counter).with("key_prefix.ini")
+    Dalia::MiniGraphite.expects(:counter).with("key_prefix.time", is_a(Float))
+    Dalia::MiniGraphite.expects(:counter).with("key_prefix.result").never
+    Dalia::MiniGraphite.expects(:counter).with("key_prefix.end")
+
+    result =
+      Dalia::MiniGraphite.benchmark_wrapper("key_prefix", nil, true) do
         sleep(1)
         "RESULT"
       end
