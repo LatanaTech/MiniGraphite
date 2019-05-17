@@ -164,4 +164,41 @@ class MiniGraphiteTest < MiniTest::Test
     assert_equal("RESULT", result)
   end
 
+  def test_benchmark_method_on_instance_method
+    Dalia::MiniGraphite.expects(:counter).with("key_my_instance_method.time", is_a(Float))
+    Dalia::MiniGraphite.expects(:counter).with("key_my_instance_method.end")
+
+    # The test class
+    # - https://stackoverflow.com/questions/3194290/why-cant-there-be-classes-inside-methods-in-ruby
+    self.class.const_set :MyClass1, Class.new {
+      extend Dalia::MiniGraphite::MethodWrapper
+      def my_instance_method(params)
+        "RESULT: #{params}"
+      end
+      mini_graphite_benchmark_method(:my_instance_method, "key_my_instance_method")
+    }
+
+    assert_equal("RESULT: params", MyClass.new.my_instance_method("params"))
+  end
+
+  def test_benchmark_method_on_class_method
+    Dalia::MiniGraphite.expects(:counter).with("key_my_class_method.time", is_a(Float))
+    Dalia::MiniGraphite.expects(:counter).with("key_my_class_method.end")
+
+    # The test class
+    # - https://stackoverflow.com/questions/3194290/why-cant-there-be-classes-inside-methods-in-ruby
+    self.class.const_set :MyClass2, Class.new {
+      def self.my_class_method(params)
+        "RESULT: #{params}"
+      end
+
+      class << self
+        extend Dalia::MiniGraphite::MethodWrapper
+        mini_graphite_benchmark_method(:my_class_method, "key_my_class_method")
+      end
+    }
+
+    assert_equal("RESULT: params", MyClass2.my_class_method("params"))
+  end
+
 end

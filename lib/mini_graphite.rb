@@ -16,6 +16,18 @@ module Dalia
       :debug_mode => false
     }
 
+    module MethodWrapper
+      def mini_graphite_benchmark_method(method_name, key)
+        original_method = instance_method(method_name)
+
+        define_method(method_name) do |*args, &block|
+          Dalia::MiniGraphite.benchmark_wrapper(key) do
+            original_method.bind(self).call(*args, &block)
+          end
+        end
+      end
+    end
+
     def self.config(opts = {})
       @opts = DEFAULTS.merge(opts)
       @logger = Dalia::MiniGraphite::Logger.new(opts[:debug_mode])

@@ -69,6 +69,34 @@ This will send several signals:
 - *key_prefix.end:1|c*            # At the end of the block
 - *key_prefix.time_stats:1000|ms* # At the end of the block, with the Benchmark.realtime result of the execution
 
+### Method wrapper benchmark
+
+    # Dalia::MiniGraphite::MethodWrapper.mini_graphite_benchmark_method(method_name, key_prefix)
+    class MyClass
+      # Trigger the method wrapper in an instance method
+      extend Dalia::MiniGraphite::MethodWrapper
+
+      def my_instance_method
+      end
+
+      mini_graphite_benchmark_method(:my_instance_method)
+
+
+      # Trigger the method wrapper in a class method
+      def self.my_class_method
+      end
+
+      class << self
+        extend Dalia::MiniGraphite::MethodWrapper
+        mini_graphite_benchmark_method(:my_class_method)
+      end
+    end
+
+This will send several signals:
+
+- *key_prefix.time:1000|c*        # At the end of the method, with the Benchmark.realtime result of the execution
+- *key_prefix.end:1|c*            # At the end of the method
+
 ### Routes reporter for Sinatra
 
 The rack middleware must be added to the Rack chain in config.ru passing along with it a block with  config options:
