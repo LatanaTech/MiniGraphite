@@ -79,7 +79,7 @@ This will send several signals:
       def my_instance_method
       end
 
-      mini_graphite_benchmark_method(:my_instance_method)
+      mini_graphite_benchmark_method(:my_instance_method, "key_name")
 
 
       # Trigger the method wrapper in a class method
@@ -88,7 +88,7 @@ This will send several signals:
 
       class << self
         extend Dalia::MiniGraphite::MethodWrapper
-        mini_graphite_benchmark_method(:my_class_method)
+        mini_graphite_benchmark_method(:my_class_method, "key_name")
       end
     end
 
