@@ -98,6 +98,15 @@ class MiniGraphiteTest < MiniTest::Test
     Dalia::MiniGraphite.counter("test.age", 31)
   end
 
+  def test_on_datapoint_connection_timeout
+    within_timezone "UTC" do
+      Dalia::MiniGraphite.stubs(:send_tcp).raises(Errno::ETIMEDOUT.new("timeout"))
+      Dalia::MiniGraphite.config()
+      Dalia::MiniGraphite::Logger.any_instance.expects(:debug).with("Sending datapoint: 'test.age 31 1357121460'")
+      Dalia::MiniGraphite.datapoint("test.age", 31, Time.new(2013,1,2,10,11))
+    end
+  end
+
   def test_on_datapoint_should_debug
     within_timezone "UTC" do
       Dalia::MiniGraphite.expects(:send_tcp)
@@ -178,7 +187,7 @@ class MiniGraphiteTest < MiniTest::Test
       mini_graphite_benchmark_method(:my_instance_method, "key_my_instance_method")
     }
 
-    assert_equal("RESULT: params", MyClass.new.my_instance_method("params"))
+    assert_equal("RESULT: params", MyClass1.new.my_instance_method("params"))
   end
 
   def test_benchmark_method_on_class_method
