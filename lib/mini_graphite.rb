@@ -2,11 +2,14 @@ require_relative "mini_graphite/version"
 require_relative "mini_graphite/logger"
 require_relative "mini_graphite/routes_reporter"
 require "benchmark"
+require "retry_it"
 
 require "socket"
 
 module Dalia
   module MiniGraphite
+    extend RetryIt
+
     DEFAULTS = {
       :graphite_host => "graphite.host.com",
       :graphite_port => 2003,
@@ -17,6 +20,7 @@ module Dalia
     }
 
     module MethodWrapper
+
       def mini_graphite_benchmark_method(method_name, key)
         original_method = instance_method(method_name)
 
@@ -39,7 +43,11 @@ module Dalia
       signal = "#{key} #{value} #{timestamp.to_i}"
       logger.debug("Sending datapoint: '#{signal}'")
 
-      send_tcp(signal) if !opts[:mock_mode]
+      retry_it(timeout: 2, errors: [Errno::ETIMEDOUT], max_runs: 2) do
+        send_tcp(signal) if !opts[:mock_mode]
+      end
+    rescue Errno::ETIMEDOUT => e
+      nil # If an error is still here just ignore for not brake a caller
     end
 
     def self.counter(key, value = nil)
