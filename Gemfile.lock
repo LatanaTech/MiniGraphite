@@ -26,5 +26,8 @@ DEPENDENCIES
   rack
   rake
 
+RUBY VERSION
+   ruby 2.6.3p62
+
 BUNDLED WITH
-   2.2.12
+   2.3.9
